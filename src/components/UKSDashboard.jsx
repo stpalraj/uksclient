@@ -44,7 +44,7 @@ const UKSDashboard = ({ show, setShow, user, setUser, API, onUpdated }) => {
               objectFit: "cover",
             }}
             variant="top"
-            src={user?.image || ""}
+            src={user?.image ? `data:image/png;base64,${user.image}` : ""}
           />
           <Card.Body>
             <Card.Title className="text-uppercase">

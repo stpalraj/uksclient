@@ -28,23 +28,20 @@ const UksForm = ({ API, onCreated, formData, setFormData, uksTks }) => {
     try {
       const hasFile = formData?.image && formData.image instanceof File;
       if (hasFile) {
-        const payload = new FormData();
-        Object.entries(formData).forEach(([key, val]) => {
-          if (val === undefined || val === null) return;
-          // skip _id when creating; keep when updating (server may ignore)
-          if (key === "_id" && !formData._id) return;
-          // Append files/values; FormData handles File objects directly
-          if (Array.isArray(val)) {
-            val.forEach((v) => payload.append(key, v));
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const base64Image = reader.result.split(",")[1]; // Get base64 string without prefix
+          console.log("Base64 Image String:", base64Image);
+          const payload = { ...formData, image: base64Image };
+          if (formData?._id) {
+            await axios.put(`${API}/ukstks/${formData._id}`, payload);
           } else {
-            payload.append(key, val);
+            await axios.post(`${API}/ukstks`, payload);
           }
-        });
-        if (formData?._id) {
-          await axios.put(`${API}/ukstks/${formData._id}`, payload);
-        } else {
-          await axios.post(`${API}/ukstks`, payload);
-        }
+          setFormData({});
+          onCreated();
+        };
+        reader.readAsDataURL(formData.image);
       } else {
         if (formData?._id) {
           await axios.put(`${API}/ukstks/${formData._id}`, formData);
